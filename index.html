@@ -1,106 +1,144 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anki WebApp</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anki WebApp Offline</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
   <style>
     body {
       font-family: sans-serif;
-      background: #f0f0f0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      background: #f4f4f4;
       margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .card-container {
       perspective: 1000px;
+      width: 90%;
+      max-width: 400px;
     }
 
     .card {
-      width: 300px;
-      height: 200px;
+      width: 100%;
+      height: 250px;
       position: relative;
-      transform-style: preserve-3d;
       transition: transform 0.6s;
+      transform-style: preserve-3d;
       cursor: pointer;
     }
 
-    .card.flipped {
+    .card.flip {
       transform: rotateY(180deg);
     }
 
-    .side {
+    .card-side {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
       background: white;
-      border: 2px solid #ccc;
-      border-radius: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       padding: 20px;
-      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
-    .back {
+    .card-front {
+      z-index: 2;
+    }
+
+    .card-back {
       transform: rotateY(180deg);
     }
 
-    .buttons {
+    .actions {
       margin-top: 20px;
-      display: none;
+      display: flex;
       gap: 10px;
     }
 
-    button {
-      padding: 10px 15px;
+    .actions button {
+      flex: 1;
+      padding: 10px;
       border: none;
-      border-radius: 5px;
-      background: #007aff;
-      color: white;
-      font-weight: bold;
+      border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
+      background-color: #007aff;
+      color: white;
     }
 
-    button:active {
-      transform: scale(0.95);
+    .audio-buttons {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .audio-buttons button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #ccc;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="card-container">
     <div class="card" id="card">
-      <div class="side front" id="front">Palabra en español</div>
-      <div class="side back" id="back">Traducción + ejemplo</div>
+      <!-- Frente de la tarjeta -->
+      <div class="card-side card-front">
+        <h1 id="word">Cargando...</h1>
+        <div class="audio-buttons">
+          <button id="playWord">🔊 Palabra</button>
+        </div>
+        <small>Toca la tarjeta para voltear ➤</small>
+      </div>
+      <!-- Reverso de la tarjeta -->
+      <div class="card-side card-back">
+        <p id="definition">Definición</p>
+        <p id="sentence">Oración de ejemplo</p>
+        <div class="audio-buttons">
+          <button id="playSentence">🎧 Oración</button>
+        </div>
+        <div class="actions">
+          <button id="again">🔁 No recordé</button>
+          <button id="seen">✅ Lo recordé</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="buttons" id="buttons">
-    <button onclick="mark('hard')">Difícil</button>
-    <button onclick="mark('good')">Bueno</button>
-    <button onclick="mark('easy')">Fácil</button>
-  </div>
 
+  <script src="app.js"></script>
   <script>
-    const card = document.getElementById('card');
-    const buttons = document.getElementById('buttons');
-
-    card.addEventListener('click', () => {
-      card.classList.toggle('flipped');
-      if (card.classList.contains('flipped')) {
-        buttons.style.display = 'flex';
-      } else {
-        buttons.style.display = 'none';
-      }
-    });
-
-    function mark(level) {
-      alert("Marcaste como: " + level);
-      // Aquí iría la lógica para guardar el progreso y cargar otra tarjeta
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then((registration) => {
+            console.log('Service Worker registrado con éxito:', registration);
+          })
+          .catch((error) => {
+            console.log('Error al registrar el Service Worker:', error);
+          });
+      });
     }
+
+    // Voltear la tarjeta con clic
+    const card = document.getElementById('card');
+    card.addEventListener('click', () => {
+      card.classList.toggle('flip');
+    });
   </script>
 </body>
 </html>
