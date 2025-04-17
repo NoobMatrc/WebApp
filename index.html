@@ -1,37 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anki WebApp Offline</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="manifest" href="manifest.json" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anki WebApp</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card-container {
+      perspective: 1000px;
+    }
+
+    .card {
+      width: 300px;
+      height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: none;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #007aff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
 <body>
-  <div class="card">
-    <h1 id="word">Cargando...</h1>
-    <p id="definition"></p>
-    <p id="sentence"></p>
-    <button id="playWord">🔊 Palabra</button>
-    <button id="playSentence">🎧 Oración</button>
-    <div class="actions">
-      <button id="again">🔁 Repasar</button>
-      <button id="seen">✅ Ya lo vi</button>
+  <div class="card-container">
+    <div class="card" id="card">
+      <div class="side front" id="front">Palabra en español</div>
+      <div class="side back" id="back">Traducción + ejemplo</div>
     </div>
   </div>
-  <script src="app.js"></script>
+  <div class="buttons" id="buttons">
+    <button onclick="mark('hard')">Difícil</button>
+    <button onclick="mark('good')">Bueno</button>
+    <button onclick="mark('easy')">Fácil</button>
+  </div>
+
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then((registration) => {
-            console.log('Service Worker registrado con éxito:', registration);
-          })
-          .catch((error) => {
-            console.log('Error al registrar el Service Worker:', error);
-          });
-      });
+    const card = document.getElementById('card');
+    const buttons = document.getElementById('buttons');
+
+    card.addEventListener('click', () => {
+      card.classList.toggle('flipped');
+      if (card.classList.contains('flipped')) {
+        buttons.style.display = 'flex';
+      } else {
+        buttons.style.display = 'none';
+      }
+    });
+
+    function mark(level) {
+      alert("Marcaste como: " + level);
+      // Aquí iría la lógica para guardar el progreso y cargar otra tarjeta
     }
-  </script>  
+  </script>
 </body>
 </html>
